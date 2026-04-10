@@ -4,9 +4,12 @@ A decompiler and compiler for the Yu-Ris engine, with parallelism.
 
 Tested on v488 [Natsuzora Asterism](https://www.dlsite.com/maniax/work/=/product_id/RJ367965.html) and v494 official example
 
-## Dependencies
+## Requirements
 
-> pip install murmurhash2 xor-cipher deflate
+1. Install python version 3.13 (any revision should suffice).
+2. Install the following modules:
+   
+   > pip install murmurhash2 xor-cipher deflate
 
 ## Usage and Example
 
