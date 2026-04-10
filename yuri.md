@@ -437,6 +437,7 @@ if __name__ == '__main__':
   yuridec.run(
     'input_ysbin_folder', # input ybn files in this folder
     'output_src_folder' , # output source files into this folder
+    # - below optional, please pass them with keyword argument -
     key=0xDEADBEEF,       # YSTB encryption key, pass 0 if already decrypted by other tools, pass None to use the public version key
     ienc: str = 'cp932' , # text encoding in ybn files, often cp932, some game use utf-8 or others
     oenc: str | None    , # output source encoding, default depending on output syntax (yst - cp932, yuri - utf8)
@@ -483,7 +484,7 @@ if __name__ == '__main__':
     'original_ysbin_folder', # troot: str
     # output YPF file
     'ysbin.ypf', # o_ypf: str
-    # - below optional -
+    # - below optional, please pass them with keyword argument -
     i_enc = 'utf-8', # encoding of input source files, default utf-8
     t_enc = 'cp932', # encoding of original ysbin files, default cp932
     t_ver: int|None, # force version of original ysbin files, like in yuridec.run
