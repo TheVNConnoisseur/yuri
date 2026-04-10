@@ -50,7 +50,8 @@ class YSLB:
         f.writelines(f'[{i}] {repr(l)}\n' for i, l in enumerate(self.lbls))
 
     @staticmethod
-    def create(f: BinIO, v: int, lbls: Seq[Lbl], enc: str = CP932, *, h: THashFn | None = None):
+    def create(f: BinIO, v: int, lbls: Seq[Lbl], enc: str = CP932, *,
+               h: THashFn | None = None, w_ver: int | None = None):
         assert v in VerRange, f'unsupported version: {v}'
         h = ver_hash(v, h)
         ls = [(nb := bytes(l.name, enc), h(nb, 0) or 0, l) for l in lbls]
@@ -63,7 +64,7 @@ class YSLB:
             idxs[i], idx = idx, idx+idxs[i]
         if byteorder == 'big':
             idxs.byteswap()
-        f.write(SYslHead.pack(YslMagic, v, len(ls)))
+        f.write(SYslHead.pack(YslMagic, w_ver or v, len(ls)))
         f.write(idxs)
         for nb, nh, l in ls:
             f.writelines((len(nb).to_bytes(), nb))

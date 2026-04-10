@@ -83,7 +83,8 @@ TAsmV200 = tuple[bytes, bytearray, bytearray]
 TAsmV300 = tuple[bytes, bytearray, bytearray, bytearray, bytearray]
 
 
-def assemble_ystb(cmds: Seq[Cmd], v: int, enc: str, post_ins: PostIns | None) -> TAsmV200 | TAsmV300:
+def assemble_ystb(cmds: Seq[Cmd], v: int, enc: str, post_ins: PostIns | None,
+                  w_ver: int | None) -> TAsmV200 | TAsmV300:
     cmds_idx = 0
     cmds_off = [0]
     expr_dat = bytearray()
@@ -114,9 +115,9 @@ def assemble_ystb(cmds: Seq[Cmd], v: int, enc: str, post_ins: PostIns | None) ->
         for a in c.args:
             args_dat += a.to_bs(v)
     if v >= 300:
-        h = TYstb300.pack(b'YSTB', v, cmds_idx, len(cmds_dat),
+        h = TYstb300.pack(b'YSTB', w_ver or v, cmds_idx, len(cmds_dat),
                           len(args_dat), len(expr_dat), len(lnos_dat))
         return (h, cmds_dat, args_dat, expr_dat, lnos_dat)
     else:
-        h = TYstb200.pack(b'YSTB', v, lc := len(cmds_dat), len(expr_dat), 32+lc)
+        h = TYstb200.pack(b'YSTB', w_ver or v, lc := len(cmds_dat), len(expr_dat), 32+lc)
         return (h, cmds_dat, expr_dat)

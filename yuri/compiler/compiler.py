@@ -39,7 +39,8 @@ def compile_file(
         cvars: dict[str, tuple[Typ, int]],
         gvars: dict[str, Typ],
         fvars: dict[str, Typ],
-        module: ast.Module, ver: int, enc: str, opts: ComOpts) -> TCompile:
+        module: ast.Module, ver: int, enc: str, opts: ComOpts,
+        w_ver: int | None) -> TCompile:
     cmds: list[Cmd] = []
     syms: list[LSym | ESym | SSym] = []
     lbls: dict[str, tuple[Cmd, int, int]] = {}
@@ -341,7 +342,7 @@ def compile_file(
         syms[isym][0].append(pre_len+4)  # IOpV, 0x03, 0x01, Tyq, ISym:u16LE
 
     do_stmt_list(module.body)
-    ybnseg = assemble_ystb(cmds, ver, enc, post_ins)
+    ybnseg = assemble_ystb(cmds, ver, enc, post_ins, w_ver)
     lblpos = [(v.cmds_idx if ver >= 300 else v.cmds_off, k, i, l) for k, (v, i, l) in lbls.items()]
     return ntxt, nsvar, nlvar, lblpos, syms, ybnseg
 

@@ -17,5 +17,5 @@ class YSTD:
         assert v in VerRange, f'unsupported version: {v}'
         return cls(v, nvar, ntext)
 
-    def tobytes(self):
-        return SYstd.pack(Magic, self.ver, self.nvar, self.ntext)
+    def tobytes(self, w_ver: int | None = None):
+        return SYstd.pack(Magic, w_ver or self.ver, self.nvar, self.ntext)

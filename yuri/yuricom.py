@@ -32,6 +32,7 @@ class ComCtx(NamedTuple):
     i_enc: str
     o_enc: str | CustomEncoder
     opts: ComOpts
+    w_ver: int | None
 
 
 def task_compile(arg: tuple[str, str, tuple[dict[str, Typ], bytes], ComCtx]) -> TCompile:
@@ -59,7 +60,7 @@ def task_compile(arg: tuple[str, str, tuple[dict[str, Typ], bytes], ComCtx]) -> 
     makedirs(path.dirname(workpath), exist_ok=True)
     mod = ast.parse(text, filepath)
     try:
-        res = compile_file(c.cdefs, c.cdict, c.gvar_typ, fvars, mod, c.ver, oe_name, c.opts)
+        res = compile_file(c.cdefs, c.cdict, c.gvar_typ, fvars, mod, c.ver, oe_name, c.opts, c.w_ver)
     except Exception as e:
         e.add_note(f'file: {filepath}')
         raise
@@ -130,6 +131,8 @@ def run(
     o_ypf: str,  # output ypf path
     i_enc: str = 'utf-8',  # source encoding
     t_enc: str = CP932,  # encoding in troot files
+    t_ver: int | None = None,  # force version in troot
+    w_ver: int | None = None,  # force version when writing
     o_enc: str | CustomEncoder = CP932,  # encoding in output files
     # SysVar:name -> Typ, idx, otherwise only __SysXXX is available
     cdict: dict[str, tuple[Typ, int]] | None = None,
@@ -141,7 +144,7 @@ def run(
     oe_name = o_enc.name if isinstance(o_enc, CustomEncoder) else o_enc
     # template files: YSVR, YSCM, YSCFG, YSER
     with open(f'{troot}/ysv.ybn', 'rb') as fp:
-        ysvr = YSVR.read(Rdr.from_bio(fp, t_enc))
+        ysvr = YSVR.read(Rdr.from_bio(fp, t_enc), v=t_ver)
         del ysvr.vars[VMinUsr:]
     with open(f'{troot}/ysc.ybn', 'rb') as fp:
         yscm_bin = fp.read()
@@ -150,7 +153,7 @@ def run(
     with open(f'{troot}/yscfg.ybn', 'rb') as fp:
         yscf_bin = fp.read()
     # cdefs, cdict
-    yscm = YSCM.read(Rdr(yscm_bin, CP932))
+    yscm = YSCM.read(Rdr(yscm_bin, CP932), v=t_ver)
     cdefs = {c.name: (i, {a.name: j for j, a in enumerate(c.args)})
              for i, c in enumerate(yscm.cmds)}
     cdict = cdict or {}
@@ -204,7 +207,7 @@ def run(
         fvars_typ[fdrpath] = fvars
         fvar_defs.append((fdrpath, fdefs))
     # compile sources
-    com_ctx = ComCtx(wroot, iroot, force_recompile, cdefs, cdict, gvar_typ, ver, i_enc, o_enc, opts)
+    com_ctx = ComCtx(wroot, iroot, force_recompile, cdefs, cdict, gvar_typ, ver, i_enc, o_enc, opts, w_ver)
     com_tasks: list[tuple[str, str, tuple[dict[str, Typ], bytes], ComCtx]] = []
     for dirpath, filepath in source_list:
         dirsegs = dirpath.split(path.sep)
@@ -297,11 +300,11 @@ def run(
         ypf_ents = [task_link(t) for t in link_tasks]
     # create YSVR, YSLB, YSTL, YSTD, add other files
     all_nvar = lvar_idx
-    YSLB.create(yslb_bio := BytesIO(), ver, all_lbls, oe_name)
+    YSLB.create(yslb_bio := BytesIO(), ver, all_lbls, oe_name, w_ver=w_ver)
     ystl = YSTL(ver, all_scrs)
-    ystl.write(ystl_bio := BytesIO(), oe_name)
-    ystd_bin = YSTD(ver, all_nvar, sum_ntxt).tobytes()
-    ysvr.write(ysvr_bio := BytesIO(), oe_name)
+    ystl.write(ystl_bio := BytesIO(), oe_name, w_ver=w_ver)
+    ystd_bin = YSTD(ver, all_nvar, sum_ntxt).tobytes(w_ver=w_ver)
+    ysvr.write(ysvr_bio := BytesIO(), oe_name, w_ver=w_ver)
     yslb_bin = yslb_bio.getvalue()
     ystl_bin = ystl_bio.getvalue()
     ysvr_bin = ysvr_bio.getvalue()

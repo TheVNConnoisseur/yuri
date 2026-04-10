@@ -50,9 +50,9 @@ class YSTL:
         r.assert_eof(v)
         return cls(v, scrs)
 
-    def write(self, f: BinIO, enc: str = CP932, *, v: int | None = None):
+    def write(self, f: BinIO, enc: str = CP932, *, v: int | None = None, w_ver: int | None = None):
         assert (v := v or self.ver) in VerRange, f'unsupported version: {v}'
-        f.write(SYstlHead.pack(YstlMagic, v, len(self.scrs)))
+        f.write(SYstlHead.pack(YstlMagic, w_ver or v, len(self.scrs)))
         wfn = Scr.writeNew if v >= VScrNew else Scr.writeOld
         for s in self.scrs:
             wfn(s, f, enc)

@@ -80,9 +80,9 @@ class YSVR:
         r.assert_eof(v)
         return cls(v, vars)
 
-    def write(self, f: BinIO, enc: str = CP932, *, v: int | None = None):
+    def write(self, f: BinIO, enc: str = CP932, *, v: int | None = None, w_ver: int | None = None):
         assert (v := v or self.ver) in VerRange, f'unsupported version: {v}'
-        f.write(SYsvHead.pack(YsvMagic, v, len(self.vars)))
+        f.write(SYsvHead.pack(YsvMagic, w_ver or v, len(self.vars)))
         fun = Var.writeV481 if v >= 481 else Var.writeV000
         for var in self.vars:
             fun(var, f, enc)
