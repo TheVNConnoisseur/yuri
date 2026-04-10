@@ -4,9 +4,12 @@ A decompiler and compiler for the Yu-Ris engine, with parallelism.
 
 Tested on v488 [Natsuzora Asterism](https://www.dlsite.com/maniax/work/=/product_id/RJ367965.html) and v494 official example
 
-## Dependencies
+## Requirements
 
-> pip install murmurhash2 xor-cipher deflate
+1. Install python version 3.13 (any revision should suffice).
+2. Install the following modules:
+   
+   > pip install murmurhash2 xor-cipher deflate
 
 ## Usage and Example
 
@@ -99,4 +102,4 @@ Both their arguments are (.yuri directory, text directory).
 As usual, freeze_support is needed.
 
 gbk.py has a patch_exe(infile, outfile) function, it makes the Yu-Ris exe uses gbk instead of shiftjis.
-modifed from https://github.com/jyxjyx1234/YURIS_TOOLS/blob/main/GBK.py
+modified from https://github.com/jyxjyx1234/YURIS_TOOLS/blob/main/GBK.py

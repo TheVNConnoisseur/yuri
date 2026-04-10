@@ -10,10 +10,14 @@ if __name__ == '__main__':
     with open('example/v494.ycd', 'rb') as fp:
         yscd = YSCD.read(Rdr.from_bio(fp))
         cdict = {v.name: (v.typ, i) for i, v in enumerate(yscd.vars)}
-    yuridec.run('files/v494', 'example/v494', dcls=yuridec.YDecYuris, yscd=yscd)
+    # ver is the version of the game script file, and key is the encryption key used to encrypt the files
+    # yscd is for system variable names, if you don't have official file of it, omit this parameter
+    # but then the official compiler would not be able to compile it.
+    yuridec.run('files/v494', 'example/v494', ver=494, key=0, yscd=yscd)
 
-    # decompile into my own YURI syntax (based on python ast module)
-    yuridec.run('files/v494', 'example/v494', dcls=yuridec.YDecYuri, yscd=yscd, also_dump=True)
+    # decompile into a custom YURI syntax (based on python ast module)
+    # dcls parameter is for output syntax; yscd is for variable names, see above for note
+    yuridec.run('files/v494', 'example/v494', ver=494, key=0, also_dump=True, dcls=yuridec.YDecYuri, yscd=yscd)
 
     # compile YURI syntax into YBN then YPF, enable parallelism (default ON)
     # use ycd to enable using original names for system variables
