@@ -362,6 +362,8 @@ The two sections is XOR encrypted.
 Currently, you should use exactly Python 3.13, as there are issues with 3.12 or 3.14.
 Revision number should not matter.
 
+Requirements: `pip install murmurhash2 xor_cipher deflate`
+
 ### YPF
 
 ```python
