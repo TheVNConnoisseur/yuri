@@ -11,7 +11,9 @@ if __name__ == '__main__':
         yscd = YSCD.read(Rdr.from_bio(fp))
         cdict = {v.name: (v.typ, i) for i, v in enumerate(yscd.vars)}
     # ver is the version of the game script file, and key is the encryption key used to encrypt the files
-    yuridec.run('files/v494', 'example/v494', ver=494, key=0)
+    # yscd is for system variable names, if you don't have official file of it, omit this parameter
+    # but then the official compiler would not be able to compile it.
+    yuridec.run('files/v494', 'example/v494', ver=494, key=0, yscd=yscd)
 
     # decompile into a custom YURI syntax (based on python ast module)
     yuridec.run('files/v494', 'example/v494', ver=494, key=0, also_dump=True)
