@@ -15,7 +15,7 @@ YPF_EX  = path.join('ybn', 'original')     # Output extracted files from input Y
 ## Get the actual version of the input YPF file
 with open(YPF_IN, 'rb') as ypfinobject:
     ypf_in_entries, ypf_in_version = ypf_read(ypfinobject)
-    print('The actual version of the YPF file is: ', ypf_in_version)
+    print('The actual version of the YPF file is:', ypf_in_version)
 
 ## Extract the files from the input YPF file to the given YPF_EX folder
 for file_path, file_type, compressed, file_data, uncompressed_length in ypf_in_entries:
@@ -30,7 +30,7 @@ for file_path, file_type, compressed, file_data, uncompressed_length in ypf_in_e
 ## Parameters for YBN compilation/decompilation, and YPF creation
 YPF_VER = ypf_in_version  # Version of the YPF file reported in its header.
 YBN_VER_ACTUAL = 480 # Version of the YBN files, which those can be different from the version the game's main executable may say. That can be obtained through trial and error by doing decompilations, and seeing which version does it successfully.
-YCD = path.join('YSCom', str(YBN_VER) + '.ycd') # Official YSCom.ycd compiler
+YCD = path.join('YSCom', str(YPF_VER) + '.ycd') # Official YSCom.ycd compiler
 YBN_IN = path.join(YPF_EX, 'ysbin') # Input path of the original YBN files obtained from the YPF file
 YSTB_KEY = 0x9C28430c # XOR key of the YSTB files (the ones that are called yst00000.ybn up to the last number). For more information on what key to use check the notes in the repository.
 YSB_OUT_OFFICIAL = path.join('ybn', 'decoded', 'official') # Output path for the decoded YBN files using the official compiler (only useful that games that can be recompiled back with the official compiler)
@@ -39,16 +39,16 @@ YBN_VER = 554 # Version of the YBN files, which may differ from the ones present
 YPF_OUT = path.join('ypf', 'ysbin-output.ypf') # Path of the resulting YPF file when compiling using the custom YURI syntax
 YSB_OUT_UNOFFICIAL_TEMP = path.join('ybn', 'encoded', 'temp')
 
-# ## Load official YU-RIS compiler, used for recovering the system variable names
-# with open(YCD, 'rb') as ycdobject:
-#     yscd = YSCD.read(Rdr.from_bio(ycdobject))
-#     cdict = {v.name: (v.typ, i) for i, v in enumerate(yscd.vars)}
+## Load official YU-RIS compiler, used for recovering the system variable names
+with open(YCD, 'rb') as ycdobject:
+    yscd = YSCD.read(Rdr.from_bio(ycdobject))
+    cdict = {v.name: (v.typ, i) for i, v in enumerate(yscd.vars)}
 
-# # Decompile the given YBN files in YBN_IN to the given YSB_OUT_OFFICIAL path using the official compiler syntax
-# yuridec.run(YBN_IN, YSB_OUT_OFFICIAL, 
-#             ienc='CP932', oenc='CP932', 
-#             yscd=yscd, dcls=yuridec.YDecYuris, mp_parallel=False, also_dump=False, 
-#             key=YSTB_KEY, ver=YPF_VER) #If YPF_VER does not work, YBN_VER_ACTUAL will come in place
+# Decompile the given YBN files in YBN_IN to the given YSB_OUT_OFFICIAL path using the official compiler syntax
+yuridec.run(YBN_IN, YSB_OUT_OFFICIAL, 
+            ienc='CP932', oenc='CP932', 
+            yscd=yscd, dcls=yuridec.YDecYuris, mp_parallel=False, also_dump=False, 
+            key=YSTB_KEY, ver=YPF_VER) #If YPF_VER does not work, YBN_VER_ACTUAL will come in place
 
 # Decompile the given YBN files in YBN_IN to the given YSB_OUT_UNOFFICIAL path using the custom YURI syntax
 yuridec.run(YBN_IN, YSB_OUT_UNOFFICIAL, 
