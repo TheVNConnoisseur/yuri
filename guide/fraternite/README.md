@@ -319,4 +319,110 @@ Also, I skipped through it for a while and it didn't crash.
 
 ## Fraternite HD
 
-(TODO)
+1. Extract YPF
+
+Same
+
+```python
+from os import makedirs, path
+from yuri.fileformat import *
+import yuri.yuridec as yuridec
+import yuri.yuricom as yuricom
+from multiprocessing import freeze_support
+
+# Windows need this for multiprocessing
+if __name__ == '__main__':
+    freeze_support()
+
+YPF_IN = '/tmp/fraternite_hd/game/pac/bn.ypf'
+YPF_EX = '/tmp/fraternite_hd/extract_ypf'
+YPF_VER = 490
+
+if 0:
+    with open(YPF_IN, 'rb') as fp:
+        ents, ver = ypf_read(fp)
+        print('ypf ver', ver)
+    for name, k, c, data, ul in ents:
+        print('file', name, k, c, ul)
+        out_name = path.join(YPF_EX, *name.split('\\'))
+        makedirs(path.dirname(out_name), exist_ok=True)
+        with open(out_name, 'wb') as fp:
+            fp.write(data)
+```
+
+2. Decompile
+
+This time, the version is 481 indeed, so we don't need to force one.  
+YSTB encryption key is `0x37dfa895` (guessed by lineno).
+
+```python
+YBN_IN = path.join(YPF_EX, 'ysbin')
+DEC_YURI = '/tmp/fraternite_hd/decompile_yuri'
+VERSION = 481  # no need to force, it's really 481
+YSTB_KEY = 0x37dfa895
+
+if 0:
+    yuridec.run(YBN_IN, DEC_YURI, key=YSTB_KEY, dcls=yuridec.YDecYuri, also_dump=True)
+```
+
+3. Compile
+
+Also, fix the two `S_STR`s in `es_button.yst.yuri`.  
+Note that YPF is 490, and YBN is 481.
+
+```python
+COM_TEMP = '/tmp/fraternite_hd/com_work'
+COM_OUT = '/tmp/fraternite_hd/output.ypf'
+
+if 1:
+    yuricom.run(
+        YSTB_KEY,
+        DEC_YURI,
+        VERSION,
+        COM_TEMP,
+        YBN_IN,
+        COM_OUT,
+        # t_ver=VERSION,  # no need for this game
+        # w_ver=VERSION,  # no need for this game
+        ypf_ver=YPF_VER,  # YPF version is 490
+    )
+```
+
+**The game stays in a black screen**
+
+Then go to your decompile folder and find a `GOSUB` in the dump files.  
+For example, `data/script/eris/es_button.yst.dump`:
+
+```
+[215] off=860 lno=318 npar=16 44:GOSUB
+- [0] # RArg(id=0, typ=<Typ.Str: 3>, aop=<AOp.EQL: 0>, siz=22, off=5057, dat=['"es.BT.GROUP.CHECK"'])
+- [1] PINT RArg(id=1, typ=<Typ.Int: 1>, aop=<AOp.EQL: 0>, siz=6, off=5079, dat=[(<IOpV.VAR: 840>, <Tyq.NUM: 64>, 1413)])
+- [2] PINT2 RArg(id=2, typ=<Typ.Int: 1>, aop=<AOp.EQL: 0>, siz=6, off=5085, dat=[(<IOpV.VAR: 840>, <Tyq.NUM: 64>, 1412)])
+```
+
+We see `npar=16`, but there are only two arguments `PINT`, `PINT2`.  
+This means the game used a special scheme for the `npar` field.  
+Enable it in YURI by adding a parameter.
+
+```python
+if 1:
+    yuricom.run(
+        YSTB_KEY,
+        DEC_YURI,
+        VERSION,
+        COM_TEMP,
+        YBN_IN,
+        COM_OUT,
+        # t_ver=VERSION,  # no need for this
+        # w_ver=VERSION,  # no need for this
+        ypf_ver=YPF_VER,  # YPF version is 490
+        # enable special npar scheme
+        opts=yuricom.ComOpts(opt_v555_npar=True)
+    )
+```
+
+I first discovered this in a game with version 555, thus its name.
+Delete `COM_TEMP` and re-compile, now the game should work.  
+Like before, we try changing the window title in `system_start`.
+
+![](ss-2026-04-12_08-41-22_1775954482.png)
