@@ -1,4 +1,4 @@
-# An example - Fraternite and Fraternite HD
+# Example - Fraternite and Fraternite HD
 
 _Don't just copy paste code from this page, only run them after you understand._
 
