@@ -75,14 +75,14 @@ class YDecYuri(YDecBase):
                     # if elif -> [-3][-1]if [-2]if/elif.else [-1]elif.body
                     assert narg == 3
                     assert isinstance(dat := args[0].dat, list)
-                    stk[-1].append(ifs := ast.If(self.ins_to_ast(dat, lvars)))
+                    stk[-1].append(ifs := ast.If(self.ins_to_ast(dat, lvars), body=[], orelse=[]))
                     stk.append(ifs.body)
                     ctl.append(Ctl.IF)
                 case codes.ELSE if narg == 3:
                     assert (top := ctl[-1]) in CtlIfElif
                     assert isinstance(dat := args[0].dat, list)
                     assert isinstance(ifs := stk[-2][-1], ast.If)
-                    ifs.orelse.append(eifs := ast.If(self.ins_to_ast(dat, lvars)))
+                    ifs.orelse.append(eifs := ast.If(self.ins_to_ast(dat, lvars), body=[], orelse=[]))
                     if top == Ctl.IF:
                         stk.append(eifs.body)
                         ctl.append(Ctl.ELIF)
@@ -115,7 +115,7 @@ class YDecYuri(YDecBase):
                 case codes.LOOP:
                     assert narg == 2
                     assert isinstance(dat := args[0].dat, list)
-                    stk[-1].append(ws := ast.While(self.ins_to_ast(dat, lvars)))
+                    stk[-1].append(ws := ast.While(self.ins_to_ast(dat, lvars), body=[], orelse=[]))
                     stk.append(ws.body)
                     ctl.append(Ctl.LOOP)
                 case codes.LOOPEND:
@@ -175,7 +175,7 @@ class YDecYuri(YDecBase):
                             stk[-1].append(ast.Assign([lsub], rhsast, lineno=0))
                 case code:
                     cmdname, argnames = cnames[code]
-                    c_call = ast.Call(ast.Name(cmdname))
+                    c_call = ast.Call(ast.Name(cmdname), args=[], keywords=[])
                     kwlist = c_call.keywords
                     aolist: list[ast.stmt] = []
                     for arg in args:
@@ -192,4 +192,4 @@ class YDecYuri(YDecBase):
                         stk[-1].append(ast.With([ast.withitem(c_call)], aolist, lineno=0))
                     else:
                         stk[-1].append(ast.Expr(c_call))
-        return ast.unparse(ast.Module(root))
+        return ast.unparse(ast.Module(root, type_ignores=[]))

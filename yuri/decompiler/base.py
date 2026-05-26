@@ -149,7 +149,7 @@ class YDecBase(ABC):
                 case (IOpV(opv), tyq, idx):
                     match opv:
                         case IOpV.VAR: stk.append(self.var_to_ast(tyq, idx, lvars))
-                        case IOpV.ARR: stk.append(ast.Call(self.var_to_ast(tyq, idx, lvars)))
+                        case IOpV.ARR: stk.append(ast.Call(self.var_to_ast(tyq, idx, lvars), args=[], keywords=[]))
                         case _:  # None, arr, dims
                             stk.append(None)
                             stk.append(self.var_to_ast(tyq, idx, lvars))
@@ -160,12 +160,12 @@ class YDecBase(ABC):
                     assert len(dims) >= 2
                     arr = dims.pop()
                     dims.reverse()
-                    stk.append(ast.Call(arr, dims))
+                    stk.append(ast.Call(arr, dims, keywords=[]))
                 case IOpB.NOP: pass
                 case IOpB.TOI | IOpB.TOS:
                     assert (exp := stk.pop()) is not None
                     astname = self.AstNameTOI if ins == IOpB.TOI else self.AstNameTOS
-                    stk.append(ast.Call(astname, [exp]))
+                    stk.append(ast.Call(astname, [exp], keywords=[]))
                 case IOpB.NEG:
                     assert (exp := stk.pop()) is not None
                     stk.append(ast.UnaryOp(AstOpUSub, exp))

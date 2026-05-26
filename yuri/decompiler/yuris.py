@@ -134,7 +134,7 @@ class YDecYuris(YDecBase):
 
 
 AstEmpty = ast.Name('')
-def force_paren(e: ast.expr) -> ast.expr: return ast.Call(AstEmpty, [e])
+def force_paren(e: ast.expr) -> ast.expr: return ast.Call(AstEmpty, [e], keywords=[])
 
 
 def yuris_prec(e: ast.expr) -> tuple[int, ast.expr]:
